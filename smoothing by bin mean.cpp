@@ -11,7 +11,7 @@ int main() {
     cin >> n;
     vector<int> a(bins*n);
     for(int i=0;i<bins*n;i++) cin >> a[i];
-    sort(a.begin(), a.end());
+    sort(a.begin(), a.end(), greater<int>());
     cout << "given eles are\n";
     for(int i=0;i<bins;i++) {
         for(int j=0;j<n;j++) cout << a[i*n+j] << "\t";
