@@ -106,3 +106,98 @@ void classify(int p, int q)
                 countc[i]++;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include<stdio.h>
+#include<string.h>
+
+void classfy(int, int);
+
+char cls[10][20], titems[50][20][20], attr[10][20];
+int pcount[20], count[10], fc = 0, c = 0;
+float p[10], prob[20], pre[10], result[10];
+
+int main()
+{
+    char tup[15][20];
+    int i, j, n, tuples, k, ans = 0, t = 0;
+
+    printf("enter no of attributes:");
+    scanf("%d", &n);
+    printf("enter no of tuples:");
+    scanf("%d", &tuples);
+    printf("enter %d attributes\n", n);
+
+    for (i = 0; i < n; i++)
+        scanf("%s", attr[i]);
+
+    for (i = 0; i < tuples; i++)
+    {
+        printf("enter tuple%d\n", i + 1);
+        for (j = 0; j < n; j++)
+            scanf("%s", titems[i][j]);
+    }
+
+    printf("enter test tuple\n");
+    for (i = 0; i < n - 1; i++)
+        scanf("%s", tup[i]);
+
+    classfy(n, tuples);
+
+    for (i = 0; i < fc; i++)
+        p[i] = count[i] / (float)tuples;
+
+    for (i = 0; i < fc; i++)
+    {
+        pre[i] = 1.0;
+        for (j = 1; j < n - 1; j++)
+            pre[i] *= p[i];
+        result[i] = pre[i] * p[i];
+        if (i > 0 && result[i] > result[i - 1])
+            ans = i;
+    }
+
+    printf("The test tuple belongs to %s class", cls[ans]);
+    return 0;
+}
+
+void classfy(int p, int q)
+{
+    int i, k, t;
+    strcpy(cls[fc++], titems[0][p - 1]);
+
+    for (i = 1; i < q; i++)
+    {
+        t = 0;
+        for (k = 0; k < fc; k++)
+        {
+            if (strcmp(titems[i][p - 1], cls[k]) == 0)
+            {
+                t = -1;
+                break;
+            }
+        }
+        if (t != -1)
+            strcpy(cls[fc++], titems[i][p - 1]);
+    }
+
+    for (i = 0; i < fc; i++)
+    {
+        count[i] = 0;
+        for (k = 0; k < q; k++)
+            if (strcmp(titems[k][p - 1], cls[i]) == 0)
+                count[i]++;
+    }
+}
+
