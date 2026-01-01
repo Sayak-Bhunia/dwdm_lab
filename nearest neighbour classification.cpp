@@ -84,3 +84,98 @@ int isNear()
     nearv[s] = 999;
     return s;
 }
+
+
+
+
+
+
+
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+
+int tuples, attr;
+float near[20];
+
+void NNC(int d[20][20], int t[1][20]);
+int isNear();
+
+int main()
+{
+    int i, j, k, data[20][20], test[1][20], s;
+
+    printf("enter no of tuples:");
+    scanf("%d", &tuples);
+
+    printf("enter no of attributes:");
+    scanf("%d", &attr);
+
+    printf("enter %d tuples\n", tuples);
+    for (i = 0; i < tuples; i++)
+    {
+        for (j = 0; j < attr; j++)
+        {
+            scanf("%d", &data[i][j]);
+        }
+    }
+
+    printf("enter test tuple\n");
+    for (i = 0; i < attr; i++)
+    {
+        scanf("%d", &test[0][i]);
+    }
+
+    printf("enter k value:");
+    scanf("%d", &k);
+
+    NNC(data, test);
+
+    printf("The nearest neighbours are\n");
+    for (i = 0; i < k; i++)
+    {
+        s = isNear();
+        printf("(");
+        for (j = 0; j < attr; j++)
+        {
+            printf("%3d", data[s][j]);
+        }
+        printf(")\n");
+    }
+
+    return 0;
+}
+
+void NNC(int d[20][20], int t[1][20])
+{
+    int i, j, sum = 0;
+
+    for (i = 0; i < tuples; i++)
+    {
+        for (j = 0; j < attr; j++)
+        {
+            sum += ((d[i][j] - t[0][j]) * (d[i][j] - t[0][j]));
+        }
+        near[i] = sqrt(sum);
+        sum = 0;
+    }
+}
+
+int isNear()
+{
+    float t = near[0];
+    int s = 0, i;
+
+    for (i = 1; i < tuples; i++)
+    {
+        if (t >= near[i] && near[i] != 999)
+        {
+            t = near[i];
+            s = i;
+        }
+    }
+    near[s] = 999;
+    return s;
+}
+
