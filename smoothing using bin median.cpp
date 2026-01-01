@@ -17,7 +17,8 @@ int main() {
         for(int j=0;j<n;j++) cout << a[i*n+j] << " ";
         cout <<endl;
     }
-    cout << "mean vals are\n";
+    cout << "median vals are\n";
+    cout << fixed << setprecision(6);
     for(int i=0;i<bins;i++) {
         median = a[i*n+n/2];
         for(int j=0;j<n;j++) cout << median << " ";
