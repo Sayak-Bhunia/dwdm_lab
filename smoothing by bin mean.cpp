@@ -18,11 +18,12 @@ int main() {
         cout <<endl;
     }
     cout << "mean vals are\n";
+    cout << fixed << setprecision(6);
     for(int i=0;i<bins;i++) {
         sum = 0;
         for(int j=0;j<n;j++) sum += a[i*n+j];
         mean = sum/n;
-        for(int j=0;j<n;j++) cout << mean << " ";
+        for(int j=0;j<n;j++) cout << mean << setprecision(6) << "\t";
         cout <<endl;
     }
 }
