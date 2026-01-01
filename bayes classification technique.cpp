@@ -1,71 +1,108 @@
 #include <iostream>
+#include <cstring>
 using namespace std;
 
-static int row, col, min_freq = 2;
+void classify(int, int);
 
-void findFrequentSets(int items[][100], int transactions[][100],
-                      int no_of_items[], int no_of_transactions,
-                      int result_item[][100]);
-
-void generateSubsets(int items[][100], int setCount, int result_item[][100]);
+char cls[10][20], titems[50][20][20], attr[10][20];
+int pcount[20], countc[10], fc = 0, c = 0;
+float p[10], prob[20], pre[10], result[10];
 
 int main()
 {
-    int no_of_transactions, s = 0, k = 1, l = 0, i, j, setCount = 2, maxCount;
-    int transactions[100][100], no_of_items[100], items[100][100];
-    int result_item[100][100];
+    char tup[15][20];
+    int i, j, n, tuples, k, ans = 0, t = 0;
 
-    cout << "enter no.of transactions\n";
-    cin >> no_of_transactions;
+    cout << "enter no of attributes:";
+    cin >> n;
+    cout << "enter no of tuples:";
+    cin >> tuples;
+    cout << "enter " << n << " attributes\n";
 
-    for (i = 1; i <= no_of_transactions; i++)
+    for (i = 0; i < n; i++)
+        cin >> attr[i];
+
+    for (i = 0; i < tuples; i++)
     {
-        cout << "enter no.of items in transaction:" << i << "\n";
-        cin >> no_of_items[i];
-        cout << "enter " << no_of_items[i] << " items for transaction:" << i << "\n";
-        for (j = 1; j <= no_of_items[i]; j++)
-            cin >> transactions[i][j];
+        cout << "enter tuple" << i + 1 << "\n";
+        for (j = 0; j < n; j++)
+            cin >> titems[i][j];
     }
 
-    k = 0;
-    for (i = 1; i <= no_of_transactions; i++)
+    cout << "enter test tuple\n";
+    for (i = 0; i < n - 1; i++)
+        cin >> tup[i];
+
+    classify(n, tuples);
+
+    for (i = 0; i < fc; i++)
+        p[i] = countc[i] / (float)tuples;
+
+    for (i = 0; i < fc; i++)
     {
-        for (j = 1; j <= no_of_items[i]; j++)
+        for (j = 1; j < n - 1; j++)
         {
-            for (l = 1; l <= k; l++)
-                if (items[l][1] == transactions[i][j])
-                    break;
-            if (l > k)
-                items[++k][1] = transactions[i][j];
+            pcount[j] = 0;
+            for (k = 0; k < tuples; k++)
+            {
+                if (strcmp(titems[k][j], tup[j]) == 0 &&
+                    strcmp(cls[i], titems[k][n - 1]) == 0)
+                    pcount[j]++;
+            }
+            if (pcount[j] != 0 && t == 0)
+                prob[c++] = pcount[j] / (float)countc[i];
+            else
+            {
+                t = 1;
+                prob[c++] = (pcount[j] + 1) / (float)countc[i];
+            }
         }
     }
 
-    row = k;
-    col = 1;
-    maxCount = k;
-
-    findFrequentSets(items, transactions, no_of_items, no_of_transactions, result_item);
-    cout << "\n";
-
-    for (i = 1; i <= row; i++)
+    j = 0;
+    for (i = 0; i < fc; i++)
     {
-        for (j = 1; j <= col; j++)
-            cout << result_item[i][j] << " ";
-        cout << "\n";
+        pre[i] = 1.0;
+        for (; j < ((i + 1) * (c / fc)); j++)
+            pre[i] *= prob[j];
     }
 
-    while (setCount <= maxCount)
+    for (i = 0; i < fc; i++)
     {
-        generateSubsets(result_item, setCount, items);
-        findFrequentSets(items, transactions, no_of_items, no_of_transactions, result_item);
-
-        for (i = 1; i <= row; i++)
-        {
-            for (j = 1; j <= col; j++)
-                cout << result_item[i][j] << " ";
-            cout << "\n";
-        }
-        setCount++;
+        result[i] = pre[i] * p[i];
+        if (i > 0 && result[i] > result[i - 1])
+            ans = i;
     }
+
+    cout << "The test tuple belongs to " << cls[ans] << " class";
     return 0;
+}
+
+void classify(int p, int q)
+{
+    int i = 0, k, t = 0;
+    strcpy(cls[fc++], titems[0][p - 1]);
+
+    for (i = 1; i < q; i++)
+    {
+        t = 0;
+        for (k = 0; k < fc; k++)
+        {
+            if (strcmp(titems[i][p - 1], cls[k]) == 0)
+            {
+                t = -1;
+                break;
+            }
+        }
+        if (t != -1)
+            strcpy(cls[fc++], titems[i][p - 1]);
+    }
+
+    for (i = 0; i < fc; i++)
+    {
+        countc[i] = 0;
+        for (k = 0; k < q; k++)
+            if (strcmp(titems[k][p - 1], cls[i]) == 0)
+                countc[i]++;
+    }
 }
