@@ -1,158 +1,87 @@
 #include <iostream>
 using namespace std;
 
-static int row, col, min_freq = 2;
+const int MAX = 50;
+int min_sup = 2;
 
-void findFrequentSets(int items[][100], int transactions[][100],
-                      int no_of_items[], int no_of_transactions,
-                      int result_item[][100]);
+/* check if candidate set exists in transaction */
+bool isPresent(int cand[], int clen, int trans[], int tlen)
+{
+    int count = 0;
+    for (int i = 0; i < clen; i++)
+        for (int j = 0; j < tlen; j++)
+            if (cand[i] == trans[j])
+            {
+                count++;
+                break;
+            }
+    return (count == clen);
+}
 
-void generateSubsets(int items[][100], int setCount, int result_item[][100]);
+/* count support */
+int supportCount(int cand[], int clen, int trans[][MAX], int items[], int n)
+{
+    int cnt = 0;
+    for (int i = 0; i < n; i++)
+        if (isPresent(cand, clen, trans[i], items[i]))
+            cnt++;
+    return cnt;
+}
 
 int main()
 {
-    int no_of_transactions;
-    int transactions[100][100], no_of_items[100];
-    int items[100][100], result_item[100][100];
-    int i, j, k = 0, l, setCount = 2, maxCount;
+    int n, trans[MAX][MAX], items[MAX];
+    int freq[MAX][MAX], fcount = 0;
 
-    cout << "enter no.of transactions\n";
-    cin >> no_of_transactions;
+    cout << "Enter number of transactions: ";
+    cin >> n;
 
-    for (i = 1; i <= no_of_transactions; i++)
+    for (int i = 0; i < n; i++)
     {
-        cout << "enter no.of items in transaction:" << i << "\n";
-        cin >> no_of_items[i];
-
-        cout << "enter " << no_of_items[i] << " items for transaction:" << i << "\n";
-        for (j = 1; j <= no_of_items[i]; j++)
-            cin >> transactions[i][j];
+        cout << "No of items in transaction " << i + 1 << ": ";
+        cin >> items[i];
+        for (int j = 0; j < items[i]; j++)
+            cin >> trans[i][j];
     }
 
-    /* Generate unique 1-itemsets */
-    for (i = 1; i <= no_of_transactions; i++)
-    {
-        for (j = 1; j <= no_of_items[i]; j++)
+    /* Generate 1-itemsets */
+    int uniq[MAX], ucount = 0;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < items[i]; j++)
         {
-            for (l = 1; l <= k; l++)
-                if (items[l][1] == transactions[i][j])
-                    break;
-            if (l > k)
-                items[++k][1] = transactions[i][j];
+            bool found = false;
+            for (int k = 0; k < ucount; k++)
+                if (uniq[k] == trans[i][j])
+                    found = true;
+            if (!found)
+                uniq[ucount++] = trans[i][j];
         }
-    }
-
-    row = k;
-    col = 1;
-    maxCount = k;
-
-    findFrequentSets(items, transactions, no_of_items,
-                     no_of_transactions, result_item);
 
     cout << "\nFrequent 1-itemsets:\n";
-    for (i = 1; i <= row; i++)
+    for (int i = 0; i < ucount; i++)
     {
-        for (j = 1; j <= col; j++)
-            cout << result_item[i][j] << " ";
-        cout << "\n";
-    }
-
-    while (setCount <= maxCount)
-    {
-        generateSubsets(result_item, setCount, items);
-        findFrequentSets(items, transactions, no_of_items,
-                         no_of_transactions, result_item);
-
-        cout << "\nFrequent " << setCount << "-itemsets:\n";
-        for (i = 1; i <= row; i++)
+        int s = supportCount(&uniq[i], 1, trans, items, n);
+        if (s >= min_sup)
         {
-            for (j = 1; j <= col; j++)
-                cout << result_item[i][j] << " ";
-            cout << "\n";
+            cout << uniq[i] << endl;
+            freq[fcount++][0] = uniq[i];
         }
-        setCount++;
     }
+
+    /* Generate 2-itemsets */
+    cout << "\nFrequent 2-itemsets:\n";
+    for (int i = 0; i < fcount; i++)
+        for (int j = i + 1; j < fcount; j++)
+        {
+            int cand[2] = {freq[i][0], freq[j][0]};
+            int s = supportCount(cand, 2, trans, items, n);
+            if (s >= min_sup)
+                cout << cand[0] << " " << cand[1] << endl;
+        }
 
     return 0;
 }
 
-/* Count support and filter frequent itemsets */
-void findFrequentSets(int items[][100], int transactions[][100],
-                      int no_of_items[], int no_of_transactions,
-                      int result_item[][100])
-{
-    int i, j, l = 1, p = 1, count, m;
-
-    while (l <= row)
-    {
-        count = 0;
-        for (i = 1; i <= no_of_transactions; i++)
-        {
-            int found = 0;
-            for (m = 1; m <= col; m++)
-            {
-                for (j = 1; j <= no_of_items[i]; j++)
-                {
-                    if (items[l][m] == transactions[i][j])
-                    {
-                        found++;
-                        break;
-                    }
-                }
-            }
-            if (found == col)
-                count++;
-        }
-
-        if (count >= min_freq)
-        {
-            for (m = 1; m <= col; m++)
-                result_item[p][m] = items[l][m];
-            p++;
-        }
-        l++;
-    }
-
-    row = p - 1;
-}
-
-/* Generate candidate subsets */
-void generateSubsets(int items[][100], int setCount, int result_item[][100])
-{
-    int i, j, k = 1, newRow = 0, newCol;
-
-    for (i = 1; i <= row; i++)
-    {
-        for (j = i + 1; j <= row; j++)
-        {
-            newCol = 1;
-            newRow++;
-
-            for (k = 1; k <= col; k++)
-                result_item[newRow][newCol++] = items[i][k];
-
-            for (k = 1; k <= col; k++)
-            {
-                bool exists = false;
-                for (int m = 1; m < newCol; m++)
-                    if (result_item[newRow][m] == items[j][k])
-                        exists = true;
-                if (!exists)
-                    result_item[newRow][newCol++] = items[j][k];
-            }
-
-            if (newCol - 1 != setCount)
-            {
-                for (k = 1; k < newCol; k++)
-                    result_item[newRow][k] = 0;
-                newRow--;
-            }
-        }
-    }
-
-    row = newRow;
-    col = setCount;
-}
 
 
 
