@@ -1,87 +1,68 @@
-#include <iostream>
+#include<bits/stdc++.h>
 using namespace std;
 
-const int MAX = 50;
-int min_sup = 2;
+const int mx = 50;
+int minsup = 2;
 
-/* check if candidate set exists in transaction */
-bool isPresent(int cand[], int clen, int trans[], int tlen)
-{
-    int count = 0;
-    for (int i = 0; i < clen; i++)
-        for (int j = 0; j < tlen; j++)
-            if (cand[i] == trans[j])
-            {
-                count++;
+bool isPresent(int candidate[], int cn, int transactions[], int tn) {
+    int c = 0;
+    for(int i=0;i<cn;i++) {
+        for(int j=0;j<tn;j++) {
+            if(candidate[i] == transactions[j]) {
+                c++;
                 break;
             }
-    return (count == clen);
+        }
+    }
+    return c == cn;
 }
 
-/* count support */
-int supportCount(int cand[], int clen, int trans[][MAX], int items[], int n)
-{
-    int cnt = 0;
-    for (int i = 0; i < n; i++)
-        if (isPresent(cand, clen, trans[i], items[i]))
-            cnt++;
-    return cnt;
+int supportCount(int candidate[], int cn, int transactions[][mx], int items[], int n) {
+    int c = 0;
+    for(int i=0;i<n;i++) {
+        if(isPresent(candidate, cn, transactions[i], items[i])) c++;
+    }
+    return c;
 }
 
-int main()
-{
-    int n, trans[MAX][MAX], items[MAX];
-    int freq[MAX][MAX], fcount = 0;
-
-    cout << "Enter number of transactions: ";
+int main() {
+    int n, transactions[mx][mx], items[mx];
+    int f[mx][mx], fc = 0;
+    cout << "enter no. of transactions = ";
     cin >> n;
-
-    for (int i = 0; i < n; i++)
-    {
-        cout << "No of items in transaction " << i + 1 << ": ";
+    for(int i=0;i<n;i++) {
+        cout << "enter no. of items in transaction" << i+1 << " = ";
         cin >> items[i];
-        for (int j = 0; j < items[i]; j++)
-            cin >> trans[i][j];
+        cout << "enter items = ";
+        for(int j=0;j<items[i];j++) cin >> transactions[i][j];
     }
-
-    /* Generate 1-itemsets */
-    int uniq[MAX], ucount = 0;
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < items[i]; j++)
-        {
-            bool found = false;
-            for (int k = 0; k < ucount; k++)
-                if (uniq[k] == trans[i][j])
-                    found = true;
-            if (!found)
-                uniq[ucount++] = trans[i][j];
-        }
-
-    cout << "\nFrequent 1-itemsets:\n";
-    for (int i = 0; i < ucount; i++)
-    {
-        int s = supportCount(&uniq[i], 1, trans, items, n);
-        if (s >= min_sup)
-        {
-            cout << uniq[i] << endl;
-            freq[fcount++][0] = uniq[i];
+    int u[mx], uc = 0;
+    for(int i=0;i<n;i++) {
+        for(int j=0;j<items[i];j++) {
+            bool x = false;
+            for(int k=0;k<uc;k++) {
+                if(u[k] == transactions[i][j]) x = true;
+            }
+            if(!x) u[uc++] = transactions[i][j];
         }
     }
-
-    /* Generate 2-itemsets */
-    cout << "\nFrequent 2-itemsets:\n";
-    for (int i = 0; i < fcount; i++)
-        for (int j = i + 1; j < fcount; j++)
-        {
-            int cand[2] = {freq[i][0], freq[j][0]};
-            int s = supportCount(cand, 2, trans, items, n);
-            if (s >= min_sup)
-                cout << cand[0] << " " << cand[1] << endl;
+    cout << "\nfrequent 1-itemset = \n";
+    for(int i=0;i<uc;i++) {
+        int s = supportCount(&u[i], 1, transactions, items, n);
+        if(s>=minsup) {
+            cout << u[i] <<endl;
+            f[fc++][0] = u[i];
         }
-
-    return 0;
+    }
+    cout << "\nfrequent 2-itemset = \n";
+    for(int i=0;i<fc;i++) {
+        for(int j=i+1;j<fc;j++) {
+            int candidate[2] = {f[i][0], f[j][0]};
+            int s = supportCount(candidate, 2, transactions, items, n);
+            if(s>=minsup) cout << candidate[0] << " " << candidate[1] <<endl;
+        }
+    }
 }
-
 
 
 
